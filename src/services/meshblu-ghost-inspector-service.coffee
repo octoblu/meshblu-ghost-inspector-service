@@ -10,9 +10,8 @@ class MeshbluGhostInspectorService
   logResult: ({passing, currentTime}, callback) =>
     json = {
       success: passing
-      expires: @_getExpires()
+      expires: @_getExpires(currentTime)
     }
-    @_currentTime = currentTime
     debug "currentTime: #{currentTime} and logResult: ", json
     debug 'LOG URL in logResult: ', @logUrl
 
@@ -27,7 +26,7 @@ class MeshbluGhostInspectorService
     error.code = code
     return error
 
-  _getExpires: =>
-    return moment(@_currentTime).add(@logExpiresSeconds, 'seconds').utc().format()
+  _getExpires: (currentTime)=>
+    return moment(currentTime).add(@logExpiresSeconds, 'seconds').utc().format()
 
 module.exports = MeshbluGhostInspectorService
