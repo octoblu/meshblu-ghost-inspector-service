@@ -4,15 +4,16 @@ debug   = require('debug')('meshblu-ghost-inspector-service')
 
 
 class MeshbluGhostInspectorService
-  constructor: ( { @logUrl, @_currentTime , @logExpiresSeconds} ) ->
+  constructor: ( { @logUrl, @logExpiresSeconds} ) ->
     throw new Error 'Missing required parameter: logUrl' unless @logUrl?
 
-  logResult: ({name, passing}, callback) =>
+  logResult: ({passing, currentTime}, callback) =>
     json = {
       success: passing
       expires: @_getExpires()
     }
-    debug "logResult: ", json
+    @_currentTime = currentTime
+    debug "currentTime: #{currentTime} and logResult: ", json
     debug 'LOG URL in logResult: ', @logUrl
 
     request.post @logUrl, { json }, (error, response) =>

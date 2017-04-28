@@ -18,8 +18,8 @@ class Server
   run: (callback) =>
     app = octobluExpress({ @logFn, @disableLogging })
 
-    @_currentTime = moment()
-    meshbluGhostInspectorService = new MeshbluGhostInspectorService { @logUrl, @_currentTime, @logExpiresSeconds }
+
+    meshbluGhostInspectorService = new MeshbluGhostInspectorService { @logUrl, @logExpiresSeconds }
 
     router = new Router { meshbluGhostInspectorService }
 

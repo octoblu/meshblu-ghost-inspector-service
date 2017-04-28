@@ -12,7 +12,7 @@ describe 'MeshbluGhostInspectorService', ->
 
     @logService = shmock()
     enableDestroy(@logService)
-    @logServiceUrl = "http://localhost:#{@logService.address().port}"
+    @logServiceUrl = "http://localhost:#{@logService.address().port}" + '/ghost-inspector/duck-test'
 
     @logFn = sinon.spy()
     @logExpiresSeconds = 60
@@ -38,7 +38,7 @@ describe 'MeshbluGhostInspectorService', ->
     describe 'when the test has passed', ->
       beforeEach (done) ->
         @_currentTime = moment()
-        @reportResult = @logService.post '/verifications/duck-test'
+        @reportResult = @logService.post '/ghost-inspector/duck-test'
             .send {
               success: true
               expires: moment(@_currentTime).add(@logExpiresSeconds, 'seconds').utc().format()
@@ -64,7 +64,7 @@ describe 'MeshbluGhostInspectorService', ->
     describe 'when the test has failed', ->
       beforeEach (done) ->
         @_currentTime = moment()
-        @reportResult = @logService.post '/verifications/duck-test'
+        @reportResult = @logService.post '/ghost-inspector/duck-test'
             .send {
               success: false
               expires: moment(@_currentTime).add(@logExpiresSeconds, 'seconds').utc().format()
