@@ -12,6 +12,7 @@ class Server
     throw new Error 'Missing required parameter: logExpiresSeconds' unless @logExpiresSeconds?
 
 
+
   address: =>
     @server.address()
 

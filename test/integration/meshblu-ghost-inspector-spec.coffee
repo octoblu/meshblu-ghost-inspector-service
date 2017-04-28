@@ -12,7 +12,8 @@ describe 'MeshbluGhostInspectorService', ->
 
     @logService = shmock()
     enableDestroy(@logService)
-    @logServiceUrl = "http://localhost:#{@logService.address().port}" + '/ghost-inspector/duck-test'
+    @logServiceUrl = "http://localhost:#{@logService.address().port}" + "/verifications"
+
 
     @logFn = sinon.spy()
     @logExpiresSeconds = 60
@@ -38,7 +39,9 @@ describe 'MeshbluGhostInspectorService', ->
     describe 'when the test has passed', ->
       beforeEach (done) ->
         @_currentTime = moment()
-        @reportResult = @logService.post '/ghost-inspector/duck-test'
+        @logAuth = new Buffer('some-user:some-password').toString 'base64'
+        @reportResult = @logService.post '/verifications/duck-test'
+            .set 'Authorization', "Basic #{@logAuth}"
             .send {
               success: true
               expires: moment(@_currentTime).add(@logExpiresSeconds, 'seconds').utc().format()
@@ -48,6 +51,7 @@ describe 'MeshbluGhostInspectorService', ->
         options =
           uri: '/results/duck-test'
           baseUrl: "http://localhost:#{@serverPort}"
+          auth: {username: 'some-user', password: 'some-password'}
           json: {
             data:
               passing: true
@@ -64,7 +68,9 @@ describe 'MeshbluGhostInspectorService', ->
     describe 'when the test has failed', ->
       beforeEach (done) ->
         @_currentTime = moment()
-        @reportResult = @logService.post '/ghost-inspector/duck-test'
+        @logAuth = new Buffer('some-user:some-password').toString 'base64'
+        @reportResult = @logService.post '/verifications/duck-test'
+            .set 'Authorization', "Basic #{@logAuth}"
             .send {
               success: false
               expires: moment(@_currentTime).add(@logExpiresSeconds, 'seconds').utc().format()
@@ -74,6 +80,7 @@ describe 'MeshbluGhostInspectorService', ->
         options =
           uri: '/results/duck-test'
           baseUrl: "http://localhost:#{@serverPort}"
+          auth: {username: 'some-user', password: 'some-password'}
           json: {
             data:
               passing: false
