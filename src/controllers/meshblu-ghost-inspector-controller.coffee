@@ -1,4 +1,5 @@
-debug = require 'debug', 'meshblu-ghost-inspector-service'
+debug   = require('debug')('meshblu-ghost-inspector-service')
+_ = require 'lodash'
 class MeshbluGhostInspectorController
   constructor: ({@meshbluGhostInspectorService}) ->
     throw new Error 'Missing meshbluGhostInspectorService' unless @meshbluGhostInspectorService?
@@ -10,10 +11,11 @@ class MeshbluGhostInspectorController
       response.sendStatus(200)
 
   postResult:(request, response) =>
-    debug "Result from Ghost Inspector: ", request
     { name } = request.params
-    { testName, passing } = request.body
-    @meshbluGhostInspectorService.logResult { name, testName, passing }, (error) =>
+    passing = _.get request.body, 'data.passing'
+    debug "Result from Ghost Inspector for test: #{name} : Passing: #{passing}"
+
+    @meshbluGhostInspectorService.logResult { name, passing }, (error) =>
       return response.sendError(error) if error?
       return response.sendStatus(201)
 

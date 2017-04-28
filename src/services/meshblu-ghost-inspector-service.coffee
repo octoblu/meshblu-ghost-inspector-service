@@ -1,23 +1,20 @@
 request = require 'request'
-moment = require 'moment'
+moment  = require 'moment'
+debug   = require('debug')('meshblu-ghost-inspector-service')
+
 
 class MeshbluGhostInspectorService
   constructor: ( { @logUrl, @_currentTime , @logExpiresSeconds} ) ->
     throw new Error 'Missing required parameter: logUrl' unless @logUrl?
 
-  doHello: ({ hasError }, callback) =>
-    return callback @_createError('Not enough dancing!') if hasError?
-    callback()
-
-  logResult: ({name, testName, passing}, callback) =>
+  logResult: ({name, passing}, callback) =>
     json = {
       success: passing
       expires: @_getExpires()
-      testName: testName
     }
-    console.log "JSON in logResult: ", json
-    console.log 'LOG URL in logResult: ', @logUrl
-    @logUrl = @logUrl + "/verifications/#{name}"
+    debug "logResult: ", json
+    debug 'LOG URL in logResult: ', @logUrl
+
     request.post @logUrl, { json }, (error, response) =>
       return callback error if error?
       if response.statusCode > 399

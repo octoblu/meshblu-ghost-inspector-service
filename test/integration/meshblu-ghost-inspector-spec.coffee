@@ -7,7 +7,7 @@ enableDestroy = require 'server-destroy'
 Server        = require '../../src/server'
 moment        = require 'moment'
 
-describe 'Hello', ->
+describe 'MeshbluGhostInspectorService', ->
   beforeEach (done) ->
 
     @logService = shmock()
@@ -33,74 +33,56 @@ describe 'Hello', ->
     @server.destroy()
     @logService.destroy()
 
-  describe 'On GET /hello', ->
-    beforeEach (done) ->
 
-      options =
-        uri: '/hello'
-        baseUrl: "http://localhost:#{@serverPort}"
+  describe 'On POST /results/duck-test', ->
+    describe 'when the test has passed', ->
+      beforeEach (done) ->
+        @_currentTime = moment()
+        @reportResult = @logService.post '/verifications/duck-test'
+            .send {
+              success: true
+              expires: moment(@_currentTime).add(@logExpiresSeconds, 'seconds').utc().format()
+            }
+            .reply 201
 
-      request.get options, (error, @response, @body) =>
-        done error
-
-    it 'should return a 200', ->
-      expect(@response.statusCode).to.equal 200
-
-  describe 'when the service yields an error', ->
-    beforeEach (done) ->
-      userAuth = new Buffer('some-uuid:some-token').toString 'base64'
-
-      @authDevice = @meshblu
-        .post '/authenticate'
-        .set 'Authorization', "Basic #{userAuth}"
-        .reply 204
-
-      options =
-        uri: '/hello'
-        baseUrl: "http://localhost:#{@serverPort}"
-        auth:
-          username: 'some-uuid'
-          password: 'some-token'
-        qs:
-          hasError: true
-        json: true
-
-      request.get options, (error, @response, @body) =>
-        done error
-
-    it 'should log the error', ->
-      expect(@logFn).to.have.been.called
-
-    it 'should auth and response with 500', ->
-      expect(@response.statusCode).to.equal 500
-
-    it 'should auth the request with meshblu', ->
-      @authDevice.done()
-
-  describe.only 'On POST /results/duck', ->
-    beforeEach (done) ->
-      @_currentTime = moment()
-      @reportResult = @logService.post '/verifications/duck'
-          .send {
-            success: true,
-            expires: moment(@_currentTime).add(60, 'seconds').utc().format()
-            testName: 'some-test'
-
+        options =
+          uri: '/results/duck-test'
+          baseUrl: "http://localhost:#{@serverPort}"
+          json: {
+            data:
+              passing: true
           }
-          .reply 201
 
-      options =
-        uri: '/results/duck'
-        baseUrl: "http://localhost:#{@serverPort}"
-        json: {
-          testName: 'some-test'
-          passing: true
-        }
+        request.post options, (error, @response, @body) => done error
 
-      request.post options, (error, @response, @body) => done error
+      it 'should respond with a 201', ->
+        expect(@response.statusCode).to.equal 201
 
-    it 'should respond with a 201', ->
-      expect(@response.statusCode).to.equal 201
+      it 'should post the result to logservice', ->
+        @reportResult.done()
 
-    it 'should post the result to logservice', ->
-      @reportResult.done()
+    describe 'when the test has failed', ->
+      beforeEach (done) ->
+        @_currentTime = moment()
+        @reportResult = @logService.post '/verifications/duck-test'
+            .send {
+              success: false
+              expires: moment(@_currentTime).add(@logExpiresSeconds, 'seconds').utc().format()
+            }
+            .reply 201
+
+        options =
+          uri: '/results/duck-test'
+          baseUrl: "http://localhost:#{@serverPort}"
+          json: {
+            data:
+              passing: false
+          }
+
+        request.post options, (error, @response, @body) => done error
+
+      it 'should respond with a 201', ->
+        expect(@response.statusCode).to.equal 201
+
+      it 'should post the result to logservice', ->
+        @reportResult.done()

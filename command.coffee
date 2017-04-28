@@ -11,9 +11,9 @@ class Command
   constructor: ->
     env = envalid.cleanEnv process.env, envConfig
     @serverOptions = {
-      logUrl            : env.LOGURL
+      logUrl            : env.LOG_URL
       logExpiresSeconds : env.LOG_EXPIRES_SECOND
-      port              : env.PORTORT
+      port              : env.PORT
     }
 
   panic: (error) =>
